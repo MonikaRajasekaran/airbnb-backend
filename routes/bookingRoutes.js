@@ -19,22 +19,21 @@ const advancedResults = require('../middlewares/advancedResults');
 // Regular routes
 router
   .route('/')
-  .get(
-    advancedResults(Booking, {
-      path: 'property user',
-      select: 'title name email'
-    }),
-    getMyBookings
-  )
-  .post(protect, authorize('user', 'admin','host'), createBooking);
+  // .get(
+  //   advancedResults(Booking, {
+  //     path: 'property user',                                   
+  //     select: 'title name email'
+  //   }),
+  //   getBookings
+  // )
+  .post(protect, authorize('USER', 'ADMIN','HOST'), createBooking);
 
 router
   .route('/:bookingId')
-  .get(getMyBookings)
-  .put(protect, authorize('user', 'admin'), updateBooking)
-  .delete(protect, authorize('user', 'admin'), deleteBooking);
+  .get(protect, authorize('ADMIN','USER'),getMyBookings)
+  .put(protect, authorize('USER', 'ADMIN','HOST'), updateBooking)
+  .delete(protect, authorize('USER', 'ADMIN','HOST'), deleteBooking);
 
 // Get bookings for currently logged in user
-router.get('/my-bookings', protect, getMyBookings);
 
 module.exports = router;

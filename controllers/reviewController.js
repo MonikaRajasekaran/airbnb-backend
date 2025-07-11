@@ -108,7 +108,7 @@ exports.updateReview = asyncHandler(async (req, res, next) => {
   review = await Review.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true
-  });
+  });                                
 
   res.status(200).json({
     success: true,

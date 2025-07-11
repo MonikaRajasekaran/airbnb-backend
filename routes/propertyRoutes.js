@@ -24,7 +24,7 @@ router
   .route('/')
   .get(
     advancedResults(Property, {
-      path: 'user',
+      path: 'userId',
       select: 'name email'
     }),
     getProperties

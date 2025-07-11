@@ -1,25 +1,31 @@
 const User = require('../models/User');
-const { comparePassword, sendTokenResponse } = require('../utils/authUtils');
+const { comparePassword, createSendToken } = require('../utils/authUtils');
 
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     const user = await User.create({
       name,
       email,
-      password
+      password,
+      role: role || 'USER'
     });
 
-    sendTokenResponse(user, 200, res);
+    // Remove password from output
+    user.password = undefined;
+
+    res.status(201).json({
+      success: true,
+      data: user
+    });
   } catch (err) {
     next(err);
   }
 };
-
 // @desc    Login user
 // @route   POST /api/auth/login
 // @access  Public
@@ -55,7 +61,7 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    sendTokenResponse(user, 200, res);
+    createSendToken(user, 200, res);
   } catch (err) {
     next(err);
   }

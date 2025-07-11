@@ -11,7 +11,7 @@ exports.comparePassword = async (candidatePassword, userPassword) => {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-exports.sendTokenResponse = (user, statusCode, res) => {
+exports.createSendToken = (user, statusCode, res) => {
   const token = exports.generateToken(user._id);
   
   const cookieOptions = {
@@ -23,6 +23,8 @@ exports.sendTokenResponse = (user, statusCode, res) => {
   };
 
   res.cookie('jwt', token, cookieOptions);
+  
+  // Remove password from output
   user.password = undefined;
 
   res.status(statusCode).json({

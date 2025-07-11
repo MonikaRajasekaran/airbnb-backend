@@ -3,6 +3,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
+const cors = require('cors');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -19,6 +20,11 @@ const reviews = require('./routes/reviewRoutes');
 const users = require('./routes/userRoutes');
 
 const app = express();
+
+app.use(cors({
+  origin: 'http://localhost:3000', // Your frontend URL
+  credentials: true
+}))
 
 // Body parser
 app.use(express.json());

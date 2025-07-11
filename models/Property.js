@@ -86,8 +86,6 @@ const propertySchema = new mongoose.Schema({
   },
   userId: {
     type: String,
-    ref: 'User',
-    required: true
   }
 }, {
   toJSON: { virtuals: true },

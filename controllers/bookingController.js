@@ -8,15 +8,28 @@ const asyncHandler = require('../middlewares/async');
 // @route   GET /api/v1/properties/:propertyId/bookings
 // @access  Private
 exports.getMyBookings = asyncHandler(async (req, res, next) => {
-  const bookings = await Booking.find({ user: req.user.id }).populate({
-    path: 'property',
-    select: 'title location pricePerNight'
-  });
+  // Step 1: Get bookings for the current user
+  const bookings = await Booking.find({ userId: req.user.userId });
 
+  // Step 2: For each booking, fetch its property by `propertyId`
+  const bookingsWithProperty = await Promise.all(
+    bookings.map(async (booking) => {
+      const property = await Property.findOne({ propertyId: booking.propertyId }).select(
+        'title location pricePerNight photos'
+      );
+
+      return {
+        ...booking.toObject(),
+        property
+      };
+    })
+  );
+
+  // Step 3: Send combined response
   res.status(200).json({
     success: true,
-    count: bookings.length,
-    data: bookings
+    count: bookingsWithProperty.length,
+    data: bookingsWithProperty
   });
 });
 
@@ -55,15 +68,14 @@ exports.getBooking = asyncHandler(async (req, res, next) => {
 // @route   POST /api/v1/properties/:propertyId/bookings
 // @access  Private
 exports.createBooking = asyncHandler(async (req, res, next) => {
-  req.body.property = req.params.propertyId;
-  req.body.user = req.user.id;
+  req.body.userId = req.user.userId;
 
-  const property = await Property.findById(req.params.propertyId);
+  const property = await Property.findOne({propertyId:req.body.propertyId});
 
   if (!property) {
     return next(
       new ErrorResponse(
-        `No property with the id of ${req.params.propertyId}`,
+        `No property with the id of ${req.body.propertyId}`,
         404
       )
     );
@@ -89,25 +101,25 @@ exports.createBooking = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/bookings/:id
 // @access  Private
 exports.updateBooking = asyncHandler(async (req, res, next) => {
-  let booking = await Booking.findById(req.params.id);
+  let booking = await Booking.findOne({bookingId:req.params.bookingId});
 
   if (!booking) {
     return next(
-      new ErrorResponse(`No booking with the id of ${req.params.id}`, 404)
+      new ErrorResponse(`No booking with the id of ${req.params.bookingId}`, 404)
     );
   }
 
   // Make sure user is booking owner or admin
-  if (booking.user.toString() !== req.user.id && req.user.role !== 'admin') {
+  if (booking.userId.toString() !== req.user.userId && req.user.role !== 'ADMIN') {
     return next(
       new ErrorResponse(
-        `User ${req.user.id} is not authorized to update this booking`,
+        `User ${req.user.userId} is not authorized to update this booking`,
         401
       )
     );
   }
 
-  booking = await Booking.findByIdAndUpdate(req.params.id, req.body, {
+  booking = await Booking.findOneAndUpdate({bookingId:req.params.bookingId}, req.body, {
     new: true,
     runValidators: true
   });
@@ -122,7 +134,7 @@ exports.updateBooking = asyncHandler(async (req, res, next) => {
 // @route   DELETE /api/v1/bookings/:id
 // @access  Private
 exports.deleteBooking = asyncHandler(async (req, res, next) => {
-  const booking = await Booking.findById(req.params.id);
+  const booking = await Booking.findOne(req.params.id);
 
   if (!booking) {
     return next(

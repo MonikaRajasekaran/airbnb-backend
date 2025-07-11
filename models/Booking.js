@@ -1,54 +1,53 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const shortid = require("shortid");
 
 const BookingSchema = new mongoose.Schema({
-     bookingId:{
-     type: String,
- default: shortid.generate,
-      required: true,
+  bookingId: {
+    type: String,
+    default: shortid.generate,
+    required: true,
   },
   propertyId: {
     type: String,
-    required: true
+    required: true,
   },
   userId: {
     type: String,
-    required: true
   },
   checkInDate: {
     type: Date,
-    required: true
+    required: true,
   },
   checkOutDate: {
     type: Date,
-    required: true
+    required: true,
   },
   amountPaid: {
     type: Number,
-    required: true
+    required: true,
   },
   daysOfStay: {
     type: Number,
-    required: true
-  },
+    required: true,
+  },                                                                                         
   paymentInfo: {
     id: {
       type: String,
-      required: true
+      required: true,
     },
     status: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   paidAt: {
     type: Date,
-    required: true
+    required: true,
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('Booking', BookingSchema);
+module.exports = mongoose.model("Booking", BookingSchema);

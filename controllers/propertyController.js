@@ -13,13 +13,13 @@ exports.getProperties = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/properties/:id
 // @access  Public
 exports.getProperty = asyncHandler(async (req, res, next) => {
-  const property = await Property.findById(req.params.id)
+  const property = await Property.findOne(req.params.userId)
     .populate('bookings')
     .populate('reviews');
 
   if (!property) {
     return next(
-      new ErrorResponse(`Property not found with id of ${req.params.id}`, 404)
+      new ErrorResponse(`Property not found with userId of ${req.params.userId}`, 404)
     );
   }
 
@@ -31,7 +31,7 @@ exports.getProperty = asyncHandler(async (req, res, next) => {
 // @access  Private
 exports.createProperty = asyncHandler(async (req, res, next) => {
   // Add user to req.body
-  req.body.user = req.user.id;
+  req.body.user = req.user.userId;
 
   const property = await Property.create(req.body);
 
@@ -45,16 +45,16 @@ exports.createProperty = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/properties/:id
 // @access  Private
 exports.updateProperty = asyncHandler(async (req, res, next) => {
-  let property = await Property.findById(req.params.id);
+  let property = await Property.findOne(req.params.userId);
 
   if (!property) {
     return next(
-      new ErrorResponse(`Property not found with id of ${req.params.id}`, 404)
+      new ErrorResponse(`Property not found with userId of ${req.params.userId}`, 404)
     );
   }
 
   // Make sure user is property owner
-  if (property.user.toString() !== req.user.id && req.user.role !== 'admin') {
+  if (property.user.toString() !== req.user.userId && req.user.role !== 'admin') {
     return next(
       new ErrorResponse(
         `User ${req.user.id} is not authorized to update this property`,
@@ -63,7 +63,7 @@ exports.updateProperty = asyncHandler(async (req, res, next) => {
     );
   }
 
-  property = await Property.findByIdAndUpdate(req.params.id, req.body, {
+  property = await Property.findOneAndUpdate(req.params.userId, req.body, {
     new: true,
     runValidators: true
   });
@@ -75,19 +75,19 @@ exports.updateProperty = asyncHandler(async (req, res, next) => {
 // @route   DELETE /api/v1/properties/:id
 // @access  Private
 exports.deleteProperty = asyncHandler(async (req, res, next) => {
-  const property = await Property.findById(req.params.id);
+  const property = await Property.findOne(req.params.userId);
 
   if (!property) {
     return next(
-      new ErrorResponse(`Property not found with id of ${req.params.id}`, 404)
+      new ErrorResponse(`Property not found with userId of ${req.params.userId}`, 404)
     );
   }
 
   // Make sure user is property owner
-  if (property.user.toString() !== req.user.id && req.user.role !== 'admin') {
+  if (property.user.toString() !== req.user.userId && req.user.role !== 'admin') {
     return next(
       new ErrorResponse(
-        `User ${req.user.id} is not authorized to delete this property`,
+        `User ${req.user.userId} is not authorized to delete this property`,
         401
       )
     );
